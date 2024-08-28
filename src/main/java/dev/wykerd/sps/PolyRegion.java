@@ -7,9 +7,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class PolyRegion implements Region {
-    private final ArrayList<Double> points;
+    private final ArrayList<Point> points;
 
-    PolyRegion(ArrayList<Double> points) {
+    public PolyRegion(ArrayList<Point> points) {
         this.points = points;
     }
 
@@ -17,8 +17,12 @@ public class PolyRegion implements Region {
     public void populateJSONFields(JSONObject obj) throws JSONException {
         JSONArray pointsArray = new JSONArray();
 
-        for (Double point : points) {
-            pointsArray.put(point);
+        for (Point point : points) {
+            JSONArray pointTuple = new JSONArray();
+            pointTuple.put(point.getX());
+            pointTuple.put(point.getY());
+
+            pointsArray.put(pointTuple);
         }
 
         obj.put("points", pointsArray);
