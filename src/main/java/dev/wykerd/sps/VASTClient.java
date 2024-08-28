@@ -36,7 +36,7 @@ public class VASTClient implements SPSClient {
     private int pubCount = 0;
     private final Map<String, List<ChannelPublishListener>> listeners = new ConcurrentHashMap<>();
 
-    VASTClient(Logger logger, Point position, String clientID) {
+    public VASTClient(Logger logger, Point position, String clientID) {
         this.logger = logger;
         this.position = position;
         this.clientID = clientID;

@@ -10,7 +10,7 @@ public class MatcherAddr {
     private final String host;
     private final int port;
 
-    MatcherAddr(String host, int port) {
+    public MatcherAddr(String host, int port) {
         this.host = host.toLowerCase();
         this.port = port;
     }

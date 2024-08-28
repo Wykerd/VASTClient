@@ -7,7 +7,7 @@ public class CircularRegion implements Region {
     private final Point center;
     private final double radius;
 
-    CircularRegion(Point center, double radius) {
+    public CircularRegion(Point center, double radius) {
         this.center = center;
         this.radius = radius;
     }
