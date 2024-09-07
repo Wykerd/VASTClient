@@ -35,6 +35,7 @@ public class VASTClient implements SPSClient {
     private final Map<String, JSONObject> subscriptions;
     private int pubCount = 0;
     private final Map<String, List<ChannelPublishListener>> listeners = new ConcurrentHashMap<>();
+    private int subCount = 0;
 
     public VASTClient(Logger logger, Point position, String clientID) {
         this.logger = logger;
@@ -50,7 +51,13 @@ public class VASTClient implements SPSClient {
 
     @Override
     public CompletableFuture<Boolean> connect(URI uri) {
-        socket = IO.socket(uri);
+        JSONObject info = getClientInfo();
+
+        IO.Options options = IO.Options.builder()
+                .setQuery("myInfo=" + info)
+                .build();
+
+        socket = IO.socket(uri, options);
 
         CompletableFuture<Boolean> assignedFuture = new CompletableFuture<>();
 
@@ -72,16 +79,7 @@ public class VASTClient implements SPSClient {
         });
 
         socket.on("request_info", event -> {
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("matcherID", this.matcherId);
-                obj.put("matcherAddr", this.matcherAddr == null ? JSONObject.NULL : this.matcherAddr.toJSON());
-                obj.put("hostname", this.hostname);
-                obj.put("clientID", this.clientID);
-                obj.put("pos", this.position.toJSON());
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
+            JSONObject obj = getClientInfo();
             logger.info("VASTClient: request info: " + obj);
             socket.emit("client_info", obj);
         });
@@ -174,6 +172,20 @@ public class VASTClient implements SPSClient {
         return assignedFuture;
     }
 
+    private JSONObject getClientInfo() {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("matcherID", this.matcherId);
+            obj.put("matcherAddr", this.matcherAddr == null ? JSONObject.NULL : this.matcherAddr.toJSON());
+            obj.put("hostname", this.hostname);
+            obj.put("clientID", this.clientID);
+            obj.put("pos", this.position.toJSON());
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        return obj;
+    }
+
     @Override
     public boolean isConnected() {
         return this.connected;
@@ -199,6 +211,7 @@ public class VASTClient implements SPSClient {
         JSONObject payload = new JSONObject();
 
         try {
+            payload.put("subID", "vc:" + this.clientID + ":" + this.subCount++);
             payload.put("channel", channel);
             payload.put("followClient", followClient ? 1 : 0);
             region.populateJSONFields(payload);
